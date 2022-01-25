@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "dfk"
+version = "0.1.0"
+description = "A forked toolbox to interact with the contracts of DefiKingdoms"
+license = "MIT"
+authors = ["iconix <narhodes1@gmail.com>", "0rtis <ortis@ortis.io>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+web3 = "^5.26.0"
+pandas = "^1.3.5"
+humanize = "^3.13.1"
+ansicolors = "^1.1.8"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+# n.b., using master branch to get `pip install -e` access
+requires = ["poetry-core @ git+https://github.com/python-poetry/poetry-core.git@master"]
+build-backend = "poetry.core.masonry.api"
