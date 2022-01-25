@@ -16,6 +16,7 @@ $ poetry install
 ### Hero App
 
 ```bash
+# hint: prepend with `LOG_LEVEL=DEBUG` to see debug logs
 $ poetry run python dfk/apps/hero.py
 
 # OR...
