@@ -113,9 +113,9 @@ AUCTIONS_OPEN_GRAPHQL_QUERY = """
                               name
                             }
                             open
-                            
+
                           }
-                          
+
                         }
                         """
 
@@ -131,7 +131,7 @@ AUCTIONS_TOKEN_IDS_GRAPHQL_QUERY = """
                               owner {
                                 owner
                               }
-                              
+
                               statGenes
                               generation
                               rarity
