@@ -385,12 +385,7 @@ optional = false
 python-versions = ">=3.8"
 
 [package.dependencies]
-numpy = [
-    {version = ">=1.18.5", markers = "platform_machine != \"aarch64\" and platform_machine != \"arm64\" and python_version < \"3.10\""},
-    {version = ">=1.19.2", markers = "platform_machine == \"aarch64\" and python_version < \"3.10\""},
-    {version = ">=1.20.0", markers = "platform_machine == \"arm64\" and python_version < \"3.10\""},
-    {version = ">=1.21.0", markers = "python_version >= \"3.10\""},
-]
+numpy = {version = ">=1.21.0", markers = "python_version >= \"3.10\""}
 python-dateutil = ">=2.8.1"
 pytz = ">=2020.1"
 
@@ -584,8 +579,8 @@ multidict = ">=4.0"
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.8"
-content-hash = "7ceb7cad1819083a18e5a51fa0096f867fc198fb36df8497b6ad203ad32b92bd"
+python-versions = "^3.10"
+content-hash = "f558a55bf72ef51493ae558e060a03c9f5b39fd393fba82f577dd73bfbe07fc6"
 
 [metadata.files]
 aiohttp = [

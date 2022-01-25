@@ -6,7 +6,7 @@ license = "MIT"
 authors = ["iconix <narhodes1@gmail.com>", "0rtis <ortis@ortis.io>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 web3 = "^5.26.0"
 pandas = "^1.3.5"
 humanize = "^3.13.1"
