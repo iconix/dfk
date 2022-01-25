@@ -71,7 +71,7 @@ ABI = """
 
 AUCTIONS_OPEN_GRAPHQL_QUERY = """
                         query {
-                          saleAuctions(skip: %d, first: %d, orderBy: startedAt, orderDirection: desc, where: {open: true}) {
+                          saleAuctions(skip: %d, first: %d, orderBy: %s, orderDirection: %s, where: %s) {
                             id
                             seller {
                                 name
@@ -97,6 +97,13 @@ AUCTIONS_OPEN_GRAPHQL_QUERY = """
                               level
                               summons
                               maxSummons
+                              profession
+                              mining
+                              gardening
+                              foraging
+                              fishing
+                              statBoost1
+                              statBoost2
                               summonerId {
                                 id
                               }
@@ -262,9 +269,10 @@ def get_auction(token_id, rpc_address):
     return auction
 
 
-def get_open_auctions(graphql_address, skip=0, count=1000):
+def get_open_auctions(graphql_address, skip=0, count=1000,
+  order_by='startedAt', order_direction='desc', where='{open: true}'):
 
-    r = requests.post(graphql_address, json={'query': AUCTIONS_OPEN_GRAPHQL_QUERY % (skip, count)})
+    r = requests.post(graphql_address, json={'query': AUCTIONS_OPEN_GRAPHQL_QUERY % (skip, count, order_by, order_direction, where)})
 
     if r.status_code != 200:
         raise Exception("HTTP error " + str(r.status_code) + ": " + r.text)
@@ -291,4 +299,3 @@ def wei2ether(wei):
 
 def ether2wei(ether):
     return int(ether * 1000000000000000000)
-
