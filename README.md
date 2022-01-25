@@ -1,5 +1,5 @@
 [![GitHub license](https://img.shields.io/github/license/0rtis/dfk.svg?style=flat-square)](https://github.com/0rtis/dfk/blob/master/LICENSE)
-[![Follow @trwitter handle](https://img.shields.io/twitter/follow/ortis95.svg?style=flat-square)](https://twitter.com/intent/follow?screen_name=ortis95) 
+[![Follow @twitter handle](https://img.shields.io/twitter/follow/ortis95.svg?style=flat-square)](https://twitter.com/intent/follow?screen_name=ortis95)
 
 
 ## DefiKingdoms contract
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 Transfer a hero from one address to another
 
 #### Info
-Hero's data can be retrieved with the `get_hero` method. A more *human-friendly* format can be generated 
+Hero's data can be retrieved with the `get_hero` method. A more *human-friendly* format can be generated
 by passing the result of `get_hero` to the `human_readable_hero` method.
 
 #### Owner
@@ -266,7 +266,7 @@ to use a hero at full stamina and do 3 attempts every call.
 
 
 #### Gardening & Mining quest
-Gardening and mining quest can be started with just one stamina. 
+Gardening and mining quest can be started with just one stamina.
 Mining quest can be done with up to 6 heroes while only 1 hero at a time can be sent on a gardening quest to a specific garden (liquidity pool).
 
 
@@ -415,7 +415,3 @@ if __name__ == "__main__":
 ```
 #### Hero level up
 Use `start_meditation` and `complete_meditation` to level up a hero. Make sure to have enough rune for the hero's level with `get_required_runes`
-
-
-
-
