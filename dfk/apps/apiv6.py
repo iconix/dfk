@@ -9,9 +9,9 @@ LOG = logging.getLogger(__name__)
 ENDPOINT = 'https://us-central1-defi-kingdoms-api.cloudfunctions.net/query_heroes'
 
 APIV6_NUM_TO_PROF = {
-  0: 'Warrior', 1: 'Knight', 2: 'Thief', 3: 'Archer', 4: 'Priest', 5: 'Wizard', 6: 'Monk', 7: 'Pirate',
-  16: 'Paladin', 17: 'DarkKnight', 18: 'Summoner', 19: 'Ninja',
-  24: 'Dragoon', 25: 'Sage', 28: 'DreadKnight'
+    0: 'Warrior', 1: 'Knight', 2: 'Thief', 3: 'Archer', 4: 'Priest', 5: 'Wizard', 6: 'Monk', 7: 'Pirate',
+    16: 'Paladin', 17: 'DarkKnight', 18: 'Summoner', 19: 'Ninja',
+    24: 'Dragoon', 25: 'Sage', 28: 'DreadKnight'
 }
 APIV6_PROF_TO_NUM = { v: k for k,v in APIV6_NUM_TO_PROF.items() }
 
@@ -53,21 +53,21 @@ def get_open_auctions(min_price: int = 1*JEWEL_MULTIPLIER, max_price: int = 9999
     LOG.info(f'Using APIV6 endpoint {ENDPOINT}')
 
     r = requests.post(ENDPOINT, json={
-      'limit': limit,
+        'limit': limit,
 
-      'params': [
-        {'field': 'saleprice', 'operator': '>=', 'value': min_price},
-        {'field': 'saleprice', 'operator': '<=', 'value': max_price}
-      ],
+        'params': [
+            {'field': 'saleprice', 'operator': '>=', 'value': min_price},
+            {'field': 'saleprice', 'operator': '<=', 'value': max_price}
+        ],
 
-      # bias towards the freshest auctions
-      'order': {'orderBy': 'saleauction', 'orderDir': 'desc'},
+        # bias towards the freshest auctions
+        'order': {'orderBy': 'saleauction', 'orderDir': 'desc'},
 
-      # n.b., helpful filter type
-      #'params': [{'field': 'id', 'operator': '=', 'value': '42361'}],
+        # n.b., helpful filter type
+        #'params': [{'field': 'id', 'operator': '=', 'value': '42361'}],
 
-      # n.b., `orderby: saleprice`` tends to result in more stale listings, for some reason
-      #'order': {'orderBy': 'saleprice', 'orderDir': 'asc'},
+        # n.b., `orderby: saleprice`` tends to result in more stale listings, for some reason
+        #'order': {'orderBy': 'saleprice', 'orderDir': 'asc'},
     })
 
     if r.status_code != 200:

@@ -37,10 +37,10 @@ LUCK_KEY = 'tokenId.luck'
 
 
 def get_open_auctions(min_price: int = 1*JEWEL_MULTIPLIER, max_price: int = 9999999*JEWEL_MULTIPLIER, limit: int = 1000) -> List[Dict]:
-  """
-  """
-  LOG.info(f'Using APIV5 endpoint {ENDPOINT}')
+    """
+    """
+    LOG.info(f'Using APIV5 endpoint {ENDPOINT}')
 
-  # note: "the tavern's broken" on this endpoint often - hence, api v6
-  where = f'{{open: true, startingPrice_gte: "{min_price}", startingPrice_lte: "{max_price}"}}'
-  return sale_auctions.get_open_auctions(graphql_address=ENDPOINT, count=limit, where=where)
+    # note: "the tavern's broken" on this endpoint often - hence, api v6
+    where = f'{{open: true, startingPrice_gte: "{min_price}", startingPrice_lte: "{max_price}"}}'
+    return sale_auctions.get_open_auctions(graphql_address=ENDPOINT, count=limit, where=where)
