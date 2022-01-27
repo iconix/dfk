@@ -24,3 +24,9 @@ $ poetry run python dfk/apps/hero.py
 $ poetry shell
 $ python dfk/apps/hero.py
 ```
+
+### Run Tests
+
+```bash
+$ poetry run pytest dfk/tests
+```

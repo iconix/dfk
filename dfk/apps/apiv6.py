@@ -8,18 +8,18 @@ LOG = logging.getLogger(__name__)
 
 ENDPOINT = 'https://us-central1-defi-kingdoms-api.cloudfunctions.net/query_heroes'
 
-APIV6_NUM_TO_PROF = {
+APIV6_NUM_TO_CLASS = {
     0: 'Warrior', 1: 'Knight', 2: 'Thief', 3: 'Archer', 4: 'Priest', 5: 'Wizard', 6: 'Monk', 7: 'Pirate',
     16: 'Paladin', 17: 'DarkKnight', 18: 'Summoner', 19: 'Ninja',
     24: 'Dragoon', 25: 'Sage', 28: 'DreadKnight'
 }
-APIV6_PROF_TO_NUM = { v: k for k,v in APIV6_NUM_TO_PROF.items() }
+APIV6_CLASS_TO_NUM = { v: k for k,v in APIV6_NUM_TO_CLASS.items() }
 
 # convert to v6 numerical format
-FORAGING_PROFS = [str(APIV6_PROF_TO_NUM[p]) for p in FORAGING_PROFS]
-FISHING_PROFS = [str(APIV6_PROF_TO_NUM[p]) for p in FISHING_PROFS]
-GARDENING_PROFS = [str(APIV6_PROF_TO_NUM[p]) for p in GARDENING_PROFS]
-MINING_PROFS = [str(APIV6_PROF_TO_NUM[p]) for p in MINING_PROFS]
+PROFESSIONS_MAP['foraging']['class'] = {str(APIV6_CLASS_TO_NUM[p]) for p in PROFESSIONS_MAP['foraging']['class']}
+PROFESSIONS_MAP['fishing']['class'] = {str(APIV6_CLASS_TO_NUM[p]) for p in PROFESSIONS_MAP['fishing']['class']}
+PROFESSIONS_MAP['gardening']['class'] = {str(APIV6_CLASS_TO_NUM[p]) for p in PROFESSIONS_MAP['gardening']['class']}
+PROFESSIONS_MAP['mining']['class'] = {str(APIV6_CLASS_TO_NUM[p]) for p in PROFESSIONS_MAP['mining']['class']}
 
 PROFESSION_KEY = 'profession'
 MAINCLASS_KEY = 'mainclass'

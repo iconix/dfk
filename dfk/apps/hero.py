@@ -1,6 +1,5 @@
 import argparse
 from datetime import datetime
-from enum import auto, Enum
 import logging
 import os
 from subprocess import call
@@ -10,58 +9,10 @@ from colors import color
 import humanize
 import pandas as pd
 
+from dfk.apps.apiv6 import *
 
-class EndpointType(Enum):
-    APIV5 = auto()
-    APIV6 = auto()
-
-RARITY_TO_COLOR = [
-    'white',    # common
-    'green',    # uncommon
-    'blue',     # rare
-    'orange', # legendary
-    'purple', # mythic
-]
-
-STAT_TO_ABBREV = {
-    'strength': 'STR',
-    'agility': 'AGI',
-    'endurance': 'END',
-    'wisdom': 'WIS',
-    'dexterity': 'DEX',
-    'vitality': 'VIT',
-    'intelligence': 'INT',
-    'luck': 'LCK'
-}
-ABBREV_TO_STAT = { v: k for k,v in STAT_TO_ABBREV.items() }
-
-PARSER = argparse.ArgumentParser(description='Watch open hero sales')
-PARSER.add_argument('-e', '--endpoint', help='API endpoint for querying DFK data',
-                    choices=list(EndpointType), default=EndpointType.APIV6,
-                    type=lambda x: EndpointType[x.upper()] if x else EndpointType.APIV6)
-PARSER.add_argument('--min-price', help='Minimum sales price to watch for (in JEWEL)',
-                    default=1, type=int)
-PARSER.add_argument('--max-price', help='Maximum sales price to watch for (in JEWEL)',
-                    default=80, type=int)
-PARSER.add_argument('--order-by', help='Order results by column name',
-                    default=None, type=str)
-PARSER.add_argument('--limit', help='Maximum number of sales to query for',
-                    default=500, type=int)
-PARSER.add_argument('--refresh', help='Interval (in seconds) for refreshing the data',
-                    default=30, type=int)
-
-ARGS = PARSER.parse_args()
 
 TABLE_FMT = '{:<6} {:<6} {:<12} {:<10} {:<10} {:<3} {:<4} {:<8} {:<16} {:<5} {:<8} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4}'
-
-if ARGS.endpoint == EndpointType.APIV5:
-    from dfk.apps.apiv5 import *
-elif ARGS.endpoint == EndpointType.APIV6:
-    from dfk.apps.apiv6 import *
-
-if not ARGS.order_by:
-    ARGS.order_by = STARTEDAT_KEY
-
 LOG = logging.getLogger(__name__)
 
 
@@ -72,11 +23,9 @@ def clear() -> None:
     _ = call('clear' if os.name =='posix' else 'cls', shell=True)
 
 
-def run_matching(df: pd.DataFrame) -> pd.DataFrame:
+def run_matching(df: pd.DataFrame, order_by: str, ascending_order: bool = False) -> pd.DataFrame:
     """
     """
-    # TODO: unit tests
-
     # TODO: generalize:
     # - take in lists of PROFESSION, MAINCLASS, SUBCLASS, STAT BOOSTS, GENERATION, RARITY, LEVEL, SUMMONS...
     # - provide a 'toggle' that subselects from above lists according to PROFESSION > TOTAL BASE STATS + STAT BOOSTS
@@ -84,18 +33,17 @@ def run_matching(df: pd.DataFrame) -> pd.DataFrame:
     #     (how much should we take subclass into account?)
     # - what is growth/growthp/growths?
 
-    foraging_match = ((df[PROFESSION_KEY] == 'foraging') & (df[MAINCLASS_KEY].isin(FORAGING_PROFS)) & (df[STATBOOST1_KEY].isin(FORAGING_STATS) | df[STATBOOST2_KEY].isin(FORAGING_STATS)))
-    fishing_match = ((df[PROFESSION_KEY] == 'fishing') & (df[MAINCLASS_KEY].isin(FISHING_PROFS)) & (df[STATBOOST1_KEY].isin(FISHING_STATS) | df[STATBOOST2_KEY].isin(FISHING_STATS)))
-    gardening_match = ((df[PROFESSION_KEY] == 'gardening') & (df[MAINCLASS_KEY].isin(GARDENING_PROFS)) & (df[STATBOOST1_KEY].isin(GARDENING_STATS) | df[STATBOOST2_KEY].isin(GARDENING_STATS)))
-    mining_match = ((df[PROFESSION_KEY] == 'mining') & (df[MAINCLASS_KEY].isin(MINING_PROFS)) & (df[STATBOOST1_KEY].isin(MINING_STATS) | df[STATBOOST2_KEY].isin(MINING_STATS)))
+    foraging_class, foraging_stats = PROFESSIONS_MAP['foraging']['class'], PROFESSIONS_MAP['foraging']['stats']
+    fishing_class, fishing_stats = PROFESSIONS_MAP['fishing']['class'], PROFESSIONS_MAP['fishing']['stats']
+    gardening_class, gardening_stats = PROFESSIONS_MAP['gardening']['class'], PROFESSIONS_MAP['gardening']['stats']
+    mining_class, mining_stats = PROFESSIONS_MAP['mining']['class'], PROFESSIONS_MAP['mining']['stats']
 
-    # TODO: should subclass be included here?
-    # foraging_match = ((df[PROFESSION_KEY] == 'foraging') & (df[MAINCLASS_KEY].isin(FORAGING_PROFS) | df[SUBCLASS_KEY].isin(FORAGING_PROFS)) & (df[STATBOOST1_KEY].isin(FORAGING_STATS) | df[STATBOOST2_KEY].isin(FORAGING_STATS)))
-    # fishing_match = ((df[PROFESSION_KEY] == 'fishing') & (df[MAINCLASS_KEY].isin(FISHING_PROFS) | df[SUBCLASS_KEY].isin(FISHING_PROFS)) & (df[STATBOOST1_KEY].isin(FISHING_STATS) | df[STATBOOST2_KEY].isin(FISHING_STATS)))
-    # gardening_match = ((df[PROFESSION_KEY] == 'gardening') & (df[MAINCLASS_KEY].isin(GARDENING_PROFS) | df[SUBCLASS_KEY].isin(GARDENING_PROFS)) & (df[STATBOOST1_KEY].isin(GARDENING_STATS) | df[STATBOOST2_KEY].isin(GARDENING_STATS)))
-    # mining_match = ((df[PROFESSION_KEY] == 'mining') & (df[MAINCLASS_KEY].isin(MINING_PROFS) | df[SUBCLASS_KEY].isin(MINING_PROFS)) & (df[STATBOOST1_KEY].isin(MINING_STATS) | df[STATBOOST2_KEY].isin(MINING_STATS)))
+    foraging_match = ((df[PROFESSION_KEY] == 'foraging') & (df[MAINCLASS_KEY].isin(foraging_class)) & (df[STATBOOST1_KEY].isin(foraging_stats) | df[STATBOOST2_KEY].isin(foraging_stats)))
+    fishing_match = ((df[PROFESSION_KEY] == 'fishing') & (df[MAINCLASS_KEY].isin(fishing_class)) & (df[STATBOOST1_KEY].isin(fishing_stats) | df[STATBOOST2_KEY].isin(fishing_stats)))
+    gardening_match = ((df[PROFESSION_KEY] == 'gardening') & (df[MAINCLASS_KEY].isin(gardening_class)) & (df[STATBOOST1_KEY].isin(gardening_stats) | df[STATBOOST2_KEY].isin(gardening_stats)))
+    mining_match = ((df[PROFESSION_KEY] == 'mining') & (df[MAINCLASS_KEY].isin(mining_class)) & (df[STATBOOST1_KEY].isin(mining_stats) | df[STATBOOST2_KEY].isin(mining_stats)))
 
-    return df.loc[foraging_match | fishing_match | gardening_match | mining_match].sort_values(by=ARGS.order_by, ascending=False) #.sort_values(STARTINGPRICE_KEY)
+    return df.loc[foraging_match | fishing_match | gardening_match | mining_match].sort_values(by=order_by, ascending=ascending_order) #.sort_values(STARTINGPRICE_KEY)
 
 
 def print_table(df: pd.DataFrame) -> pd.DataFrame:
@@ -137,8 +85,8 @@ def print_table(df: pd.DataFrame) -> pd.DataFrame:
         stat_boost[ABBREV_TO_STAT[boost2]] += '%'
 
         if ARGS.endpoint is EndpointType.APIV6:
-            main_class = APIV6_NUM_TO_PROF[int(main_class)]
-            sub_class = APIV6_NUM_TO_PROF[int(sub_class)]
+            main_class = APIV6_NUM_TO_CLASS[int(main_class)]
+            sub_class = APIV6_NUM_TO_CLASS[int(sub_class)]
 
         print(color(TABLE_FMT.format(
             id,
@@ -166,6 +114,29 @@ def print_table(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == '__main__':
+    PARSER = argparse.ArgumentParser(description='Watch open hero sales')
+    PARSER.add_argument('-e', '--endpoint', help='API endpoint for querying DFK data',
+                        choices=list(EndpointType), default=EndpointType.APIV6,
+                        type=lambda x: EndpointType[x.upper()] if x else EndpointType.APIV6)
+    PARSER.add_argument('--min-price', help='Minimum sales price to watch for (in JEWEL)',
+                        default=1, type=int)
+    PARSER.add_argument('--max-price', help='Maximum sales price to watch for (in JEWEL)',
+                        default=80, type=int)
+    PARSER.add_argument('--order-by', help='Order results by column name',
+                        default=None, type=str)
+    PARSER.add_argument('--limit', help='Maximum number of sales to query for',
+                        default=500, type=int)
+    PARSER.add_argument('--refresh', help='Interval (in seconds) for refreshing the data',
+                        default=30, type=int)
+
+    ARGS = PARSER.parse_args()
+
+    if ARGS.endpoint == EndpointType.APIV5:
+        from dfk.apps.apiv5 import *
+
+    if not ARGS.order_by:
+        ARGS.order_by = STARTEDAT_KEY
+
     LOG.debug('Watching open hero sales...')
 
     while True:
@@ -178,7 +149,7 @@ if __name__ == '__main__':
 
             LOG.debug(f'Available data ({len(auctions_df.columns)}): ' + ', '.join(list(auctions_df.columns)))
 
-            match_df = run_matching(auctions_df)
+            match_df = run_matching(auctions_df, ARGS.order_by)
             print_table(match_df)
         except KeyboardInterrupt:
             print()
