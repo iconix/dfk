@@ -3,11 +3,8 @@ import pytest
 
 import pandas as pd
 
-from dfk.apps.apibase import PROFESSIONS_MAP, EndpointType
-from dfk.apps.hero import run_matching
-
-
-PROFESSIONS = {'fishing', 'foraging', 'mining', 'gardening'}
+from dfk.apps.apibase import PROFESSIONS, PROFESSIONS_MAP, EndpointType
+from dfk.apps.hero import build_recommended_profession_matcher, run_matching
 
 
 @pytest.fixture
@@ -33,22 +30,13 @@ def test_data() -> pd.DataFrame:
     return df
 
 
-@pytest.fixture
-def startedat_key(endpoint: EndpointType) -> str:
-    if endpoint is EndpointType.APIV5:
-        from dfk.apps.apiv5 import (
-            MAINCLASS_KEY, PROFESSION_KEY, STATBOOST1_KEY, STATBOOST2_KEY, STARTEDAT_KEY
-        )
-    elif endpoint is EndpointType.APIV6:
-        from dfk.apps.apiv6 import (
-            MAINCLASS_KEY, PROFESSION_KEY, STATBOOST1_KEY, STATBOOST2_KEY, STARTEDAT_KEY
-        )
-
-    return STARTEDAT_KEY
+# TODO: test
+#   - test_run_matching without reco prof matcher
 
 
-def test_run_matching_profession_match(test_data: pd.DataFrame, startedat_key: str):
-    match_df = run_matching(test_data, startedat_key)
+def test_run_matching_recommended_profession_match(test_data: pd.DataFrame):
+    matcher = build_recommended_profession_matcher(test_data)
+    match_df = run_matching(test_data, matcher=matcher)
 
     assert len(match_df) == len(PROFESSIONS)
     assert set(match_df.profession) == PROFESSIONS

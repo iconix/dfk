@@ -21,6 +21,8 @@ PROFESSIONS_MAP['fishing']['class'] = {str(APIV6_CLASS_TO_NUM[p]) for p in PROFE
 PROFESSIONS_MAP['gardening']['class'] = {str(APIV6_CLASS_TO_NUM[p]) for p in PROFESSIONS_MAP['gardening']['class']}
 PROFESSIONS_MAP['mining']['class'] = {str(APIV6_CLASS_TO_NUM[p]) for p in PROFESSIONS_MAP['mining']['class']}
 
+CLASSES = {str(n) for n in APIV6_NUM_TO_CLASS.keys()}
+
 PROFESSION_KEY = 'profession'
 MAINCLASS_KEY = 'mainclass'
 SUBCLASS_KEY = 'subclass'
