@@ -74,7 +74,8 @@ def calculate_profession_scores(row: pd.Series) -> Dict[str, int | float]:
         profession=row[PROFESSION_KEY],
         rarity=row[RARITY_KEY],
         stats={s: stat_to_points[s] for s in PROFESSIONS_MAP[row[PROFESSION_KEY]]['stats']},
-        sub_class=row[SUBCLASS_KEY]
+        sub_class=row[SUBCLASS_KEY],
+        blue_gene=row[STATBOOST2_KEY]
     )
     kwps = valuate_profession(hero_data, row[PROFESSION_KEY])
     kwps_per_jewel = round(kwps / row[STARTINGPRICE_KEY], 4)
@@ -174,7 +175,7 @@ def print_table(df: pd.DataFrame, order_by: str, ascending_order: bool = False) 
             f'{vitality}{stat_boost["vitality"]}',
             f'{intelligence}{stat_boost["intelligence"]}',
             f'{luck}{stat_boost["luck"]}',
-            kwps,
+            int(kwps),
             kwps_per_jewel,
         ), RARITY_TO_COLOR[int(rarity)]))
 

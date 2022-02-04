@@ -37,6 +37,7 @@ class HeroData:
     rarity: int
     stats: Dict[str, int]
     sub_class: str
+    blue_gene: str
 
 
 def valuate_profession(heroData: HeroData, profession: str) -> int:
@@ -59,7 +60,7 @@ def valuate_profession(heroData: HeroData, profession: str) -> int:
     if heroData.profession == profession:
         stat_sum *= 1.1
 
-    return int(stat_sum)
+    return int(round(stat_sum))
 
 
 def calculate_stat_growth(heroData: HeroData, stat: str, levels: int) -> float:
@@ -74,10 +75,9 @@ def calculate_stat_growth(heroData: HeroData, stat: str, levels: int) -> float:
 
     # blue gene will give + 2% to the primary stat growth and + 4% to the secondary
     # since this function works per stat we just add the two bonuses to the growth
-    # TODO: what is primary and secondary?
-    # if heroData.blueGene == stat:
-    #     growth += 0.02 // primary
-    #     growth += 0.04 // secondary
+    if heroData.blue_gene == stat:
+        growth += 0.02  # primary
+        growth += 0.04  # secondary
 
     # rarity bonus
     growth += RARITY_MULTIPLIER_PCT[heroData.rarity] / 100

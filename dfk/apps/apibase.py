@@ -6,19 +6,19 @@ PROFESSIONS = {'fishing', 'foraging', 'gardening', 'mining'}
 
 PROFESSIONS_MAP = {
     'fishing': {
-        'class': {'Ninja', 'Thief', 'Sage', 'Dragoon', 'Pirate'},
+        'class': {'Ninja', 'Thief', 'Sage', 'DreadKnight', 'Dragoon', 'Pirate'},
         'stats': {'LCK', 'AGI'},
     },
     'foraging': {
-        'class': {'Sage', 'Summoner', 'DarkKnight', 'Ninja', 'Archer', 'Dragoon', 'Wizard', 'Priest'},
+        'class': {'DreadKnight', 'Sage', 'Summoner', 'DarkKnight', 'Ninja', 'Archer', 'Dragoon', 'Wizard'}, #, 'Priest'},
         'stats': {'DEX', 'INT'},
     },
     'gardening': {
-        'class': {'Sage', 'Paladin', 'Summoner', 'Priest', 'Wizard', 'Dragoon'}, #'DarkKnight', 'Monk', 'Knight'},
+        'class': {'DreadKnight', 'Sage', 'Paladin', 'Summoner', 'Priest', 'Wizard', 'Dragoon'}, #'DarkKnight', 'Monk', 'Knight'},
         'stats': {'WIS', 'VIT'}
     },
     'mining': {
-        'class': {'Paladin', 'Dragoon', 'DarkKnight', 'Knight', 'Warrior', 'Pirate'}, #'Archer', 'Monk', 'Thief'},
+        'class': {'DreadKnight', 'Paladin', 'Dragoon', 'DarkKnight', 'Knight', 'Warrior', 'Pirate'}, #'Archer', 'Monk', 'Thief'},
         'stats': {'STR', 'END'},
     }
 }
