@@ -8,13 +8,15 @@ from typing import Any, List, Union
 
 from colors import color
 import humanize
+import numpy as np
 import pandas as pd
 
 from dfk.apps.apiv6 import *
-from dfk.apps.kwps import HeroData, valuate_profession
+from dfk.apps.kwps import valuate_profession
+from dfk.apps.cs import valuate_combat_petrify
 
 
-TABLE_FMT = '{:<6} {:<6} {:<12} {:<10} {:<10} {:<3} {:<4} {:<8} {:<16} {:<5} {:<8} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4} {:<9}'
+TABLE_FMT = '{:<6} {:<6} {:<12} {:<10} {:<10} {:<3} {:<4} {:<8} {:<16} {:<5} {:<8} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4} {:<4} {:<9} {:<8} {:<8} {:<7} {:<7} {:<7} {:<9}'
 LOG = logging.getLogger(__name__)
 
 
@@ -63,20 +65,8 @@ def run_matching(df: pd.DataFrame, professions: List[str] = PROFESSIONS, classes
 def calculate_profession_scores(row: pd.Series) -> Dict[str, int | float]:
     """
     """
-    stat_to_points = {
-        'STR': row[STRENGTH_KEY], 'AGI': row[AGILITY_KEY], 'END': row[ENDURANCE_KEY], 'WIS': row[WISDOM_KEY],
-        'DEX': row[DEXTERITY_KEY], 'VIT': row[VITALITY_KEY], 'INT': row[INTELLIGENCE_KEY], 'LCK': row[LUCK_KEY]
-    }
+    hero_data = _get_hero_data(row)
 
-    hero_data = HeroData(
-        level=row[LEVEL_KEY],
-        main_class=row[MAINCLASS_KEY],
-        profession=row[PROFESSION_KEY],
-        rarity=row[RARITY_KEY],
-        stats={s: stat_to_points[s] for s in PROFESSIONS_MAP[row[PROFESSION_KEY]]['stats']},
-        sub_class=row[SUBCLASS_KEY],
-        blue_gene=row[STATBOOST2_KEY]
-    )
     kwps = valuate_profession(hero_data, row[PROFESSION_KEY])
     kwps_per_jewel = round(kwps / row[STARTINGPRICE_KEY], 4)
 
@@ -84,6 +74,38 @@ def calculate_profession_scores(row: pd.Series) -> Dict[str, int | float]:
         PROFESSIONSCORE_KEY: kwps,
         PROFESSIONSCOREPERJEWEL_KEY: kwps_per_jewel
     }
+
+
+def calculate_combat_scores(row: pd.Series) -> Dict[str, int | float]:
+    """
+    """
+    hero_data = _get_hero_data(row)
+
+    scores = valuate_combat_petrify(hero_data)
+    avg_cs = np.average(list(scores.values()))
+    avg_cs_per_jewel = round(avg_cs / row[STARTINGPRICE_KEY], 4)
+
+    return scores | {
+        COMBATSCOREAVG_KEY: avg_cs,
+        COMBATSCOREAVGPERJEWEL_KEY: avg_cs_per_jewel
+    }
+
+
+def _get_hero_data(row: pd.Series) -> HeroData:
+    stat_to_points = {
+        'STR': row[STRENGTH_KEY], 'AGI': row[AGILITY_KEY], 'END': row[ENDURANCE_KEY], 'WIS': row[WISDOM_KEY],
+        'DEX': row[DEXTERITY_KEY], 'VIT': row[VITALITY_KEY], 'INT': row[INTELLIGENCE_KEY], 'LCK': row[LUCK_KEY]
+    }
+
+    return HeroData(
+        level=row[LEVEL_KEY],
+        main_class=row[MAINCLASS_KEY],
+        profession=row[PROFESSION_KEY],
+        rarity=row[RARITY_KEY],
+        stats={s: stat_to_points[s] for s in CODE_TO_STAT.keys()},
+        sub_class=row[SUBCLASS_KEY],
+        blue_gene=row[STATBOOST2_KEY]
+    )
 
 
 def normalize_table(row: pd.Series) -> Dict[str, Any]:
@@ -106,17 +128,25 @@ def normalize_table(row: pd.Series) -> Dict[str, Any]:
     }
 
 
-def print_table(df: pd.DataFrame, order_by: str, ascending_order: bool = False) -> pd.DataFrame:
+def print_table(df: pd.DataFrame, order_by: str, ascending_order: bool = False, max_rows: int = -1) -> pd.DataFrame:
     """
     """
     normalize_df = df.apply(normalize_table, axis='columns', result_type='expand')
     df.update(normalize_df)
 
     df[PROFESSIONSCORE_KEY], df[PROFESSIONSCOREPERJEWEL_KEY] = -1, -1.0
-    scores_df = df.apply(calculate_profession_scores, axis='columns', result_type='expand')
-    df.update(scores_df)
+    profession_df = df.apply(calculate_profession_scores, axis='columns', result_type='expand')
+    df.update(profession_df)
 
-    df = df.sort_values(by=order_by, ascending=ascending_order) #[:50]
+    df[COMBATPHYSICALDAMAGE_KEY], df[COMBATMAGICALDAMAGE_KEY], df[COMBATPHYSICALTANK_KEY], \
+        df[COMBATMAGICALTANK_KEY], df[COMBATSCOREAVG_KEY], df[COMBATSCOREAVGPERJEWEL_KEY] = -1, -1, -1, -1, -1, -1.0
+    combat_df = df.apply(calculate_combat_scores, axis='columns', result_type='expand')
+    df.update(combat_df)
+
+    df = df.sort_values(by=order_by, ascending=ascending_order)
+
+    if max_rows > 0:
+        df = df[:max_rows]
 
     print(color(TABLE_FMT.format(
         'saleId',
@@ -139,10 +169,16 @@ def print_table(df: pd.DataFrame, order_by: str, ascending_order: bool = False) 
         'int',
         'lck',
         'ps',
-        'ps/jewel'
+        'ps/jewel',
+        COMBATPHYSICALDAMAGE_KEY,
+        COMBATMAGICALDAMAGE_KEY,
+        COMBATPHYSICALTANK_KEY,
+        COMBATMAGICALTANK_KEY,
+        'cs_avg',
+        'cs_avg/jewel',
     ), style='underline'))
-    for _, row in df[[SALEID_KEY, HEROID_KEY, STARTEDAT_KEY, MAINCLASS_KEY, SUBCLASS_KEY, GENERATION_KEY, RARITY_KEY, STARTINGPRICE_KEY, PROFESSION_KEY, FISHING_KEY, FORAGING_KEY, GARDENING_KEY, MINING_KEY, LEVEL_KEY, SUMMONS_KEY, MAXSUMMONS_KEY, STRENGTH_KEY, AGILITY_KEY, ENDURANCE_KEY, WISDOM_KEY, DEXTERITY_KEY, VITALITY_KEY, INTELLIGENCE_KEY, LUCK_KEY, STATBOOST1_KEY, STATBOOST2_KEY, PROFESSIONSCORE_KEY, PROFESSIONSCOREPERJEWEL_KEY]].iterrows():
-        id, token_id, start_time, main_class, sub_class, generation, rarity, starting_price, profession, fishing, foraging, gardening, mining, level, summons, max_summons, strength, agility, endurance, wisdom, dexterity, vitality, intelligence, luck, boost1, boost2, kwps, kwps_per_jewel = row
+    for _, row in df[[SALEID_KEY, HEROID_KEY, STARTEDAT_KEY, MAINCLASS_KEY, SUBCLASS_KEY, GENERATION_KEY, RARITY_KEY, STARTINGPRICE_KEY, PROFESSION_KEY, FISHING_KEY, FORAGING_KEY, GARDENING_KEY, MINING_KEY, LEVEL_KEY, SUMMONS_KEY, MAXSUMMONS_KEY, STRENGTH_KEY, AGILITY_KEY, ENDURANCE_KEY, WISDOM_KEY, DEXTERITY_KEY, VITALITY_KEY, INTELLIGENCE_KEY, LUCK_KEY, STATBOOST1_KEY, STATBOOST2_KEY, PROFESSIONSCORE_KEY, PROFESSIONSCOREPERJEWEL_KEY, COMBATPHYSICALDAMAGE_KEY, COMBATMAGICALDAMAGE_KEY, COMBATPHYSICALTANK_KEY, COMBATMAGICALTANK_KEY, COMBATSCOREAVG_KEY, COMBATSCOREAVGPERJEWEL_KEY]].iterrows():
+        id, token_id, start_time, main_class, sub_class, generation, rarity, starting_price, profession, fishing, foraging, gardening, mining, level, summons, max_summons, strength, agility, endurance, wisdom, dexterity, vitality, intelligence, luck, boost1, boost2, kwps, kwps_per_jewel, phy_dmg, mag_dmg, phy_tank, mag_tank, cs_avg, cs_avg_per_jewel  = row
 
         profession_to_points = {'fishing': fishing, 'foraging': foraging, 'gardening': gardening, 'mining': mining}
 
@@ -177,6 +213,12 @@ def print_table(df: pd.DataFrame, order_by: str, ascending_order: bool = False) 
             f'{luck}{stat_boost["luck"]}',
             int(kwps),
             kwps_per_jewel,
+            int(phy_dmg),
+            int(mag_dmg),
+            int(phy_tank),
+            int(mag_tank),
+            int(cs_avg),
+            cs_avg_per_jewel
         ), RARITY_TO_COLOR[int(rarity)]))
 
     time.sleep(ARGS.refresh)
@@ -193,8 +235,10 @@ if __name__ == '__main__':
                         default=80, type=int)
     PARSER.add_argument('--order-by', help='Order results by column name',
                         default=None, type=str)
-    PARSER.add_argument('--limit', help='Maximum number of sales to query for',
+    PARSER.add_argument('--query-limit', help='Maximum number of sales to query for',
                         default=500, type=int)
+    PARSER.add_argument('--limit', help='Maximum number of sales to display in table',
+                        default=-1, type=int)
     PARSER.add_argument('--refresh', help='Interval (in seconds) for refreshing the data',
                         default=30, type=int)
 
@@ -218,9 +262,10 @@ if __name__ == '__main__':
     while True:
         try:
             clear()
+            LOG.info(vars(ARGS))
             LOG.info(f'refresh interval: {ARGS.refresh}s')
 
-            auctions = get_open_auctions(min_price=ARGS.min_price*JEWEL_MULTIPLIER, max_price=ARGS.max_price*JEWEL_MULTIPLIER, limit=ARGS.limit)
+            auctions = get_open_auctions(min_price=ARGS.min_price*JEWEL_MULTIPLIER, max_price=ARGS.max_price*JEWEL_MULTIPLIER, limit=ARGS.query_limit)
             auctions_df = pd.json_normalize(auctions)
 
             LOG.debug(f'Available data ({len(auctions_df.columns)}): ' + ', '.join(list(auctions_df.columns)))
@@ -229,7 +274,7 @@ if __name__ == '__main__':
 
             # TODO: add cmd line arg for matcher=reco_profession_matcher
             match_df = run_matching(auctions_df, professions=ARGS.professions, matcher=reco_profession_matcher)
-            print_table(match_df, ARGS.order_by)
+            print_table(match_df, ARGS.order_by, max_rows=ARGS.limit)
         except KeyboardInterrupt:
             print()
             LOG.info('CTRL-C Caught, shutting down')

@@ -1,4 +1,4 @@
-'''
+"""
 source (javascript): https://kingdom.watch/about/heroranking
 
 The Kingdom.Watch Profession Score (KWPS) is a modified version the great algorithm Discord user @GokMachar published in the [Analysis on profession](https://www.reddit.com/r/DefiKingdoms/comments/qpotgf/analysis_on_profession/) Reddit post.
@@ -10,12 +10,9 @@ The most visible difference from @GokMachar's algorithm is that the KWPS is not 
 TODO: appreciate kingdom.watch for doing this... look for opportunities to share & be transparent like this as well
     - public API
     - public algos
-'''
+"""
 
-from dataclasses import dataclass
-from typing import Dict
-
-from dfk.apps.apibase import PROFESSIONS_MAP, CLASSES_MAP
+from dfk.apps.apibase import CLASSES_MAP, HeroData, PROFESSIONS_MAP
 
 
 VERSION = 'v0.5.1'
@@ -27,17 +24,6 @@ RARITY_MULTIPLIER_PCT = [
     87.5 / 5,  # legendary
     125 / 5    # mythic
 ]
-
-
-@dataclass
-class HeroData:
-    level: int
-    main_class: str
-    profession: str
-    rarity: int
-    stats: Dict[str, int]
-    sub_class: str
-    blue_gene: str
 
 
 def valuate_profession(heroData: HeroData, profession: str) -> int:

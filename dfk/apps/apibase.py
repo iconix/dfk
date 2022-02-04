@@ -1,4 +1,6 @@
+from dataclasses import dataclass
 from enum import auto, Enum
+from typing import Dict
 
 JEWEL_MULTIPLIER = 1000000000000000000
 
@@ -231,6 +233,26 @@ CODE_TO_STAT = { v: k for k,v in STAT_TO_CODE.items() }
 PROFESSIONSCORE_KEY = 'ps'
 PROFESSIONSCOREPERJEWEL_KEY = 'psJewel'
 
+COMBATSCOREAVG_KEY = 'csAvg'
+COMBATSCOREAVGPERJEWEL_KEY = 'csAvgJewel'
+
+# Petrify's roles - https://medium.com/@Petrify/defikingdoms-combat-stats-speculation-eabd90368a4f
+COMBATPHYSICALDAMAGE_KEY = 'phyDmg'
+COMBATMAGICALDAMAGE_KEY = 'magDmg'
+COMBATPHYSICALTANK_KEY = 'phyTank'
+COMBATMAGICALTANK_KEY = 'magTank'
+
 class EndpointType(Enum):
     APIV5 = auto()
     APIV6 = auto()
+
+
+@dataclass
+class HeroData:
+    level: int
+    main_class: str
+    profession: str
+    rarity: int
+    stats: Dict[str, int]
+    sub_class: str
+    blue_gene: str
