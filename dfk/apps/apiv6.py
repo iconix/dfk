@@ -51,15 +51,15 @@ INTELLIGENCE_KEY = 'intelligence'
 LUCK_KEY = 'luck'
 
 
-def get_open_auctions(min_price: int = 1*JEWEL_MULTIPLIER, max_price: int = 9999999*JEWEL_MULTIPLIER, limit: int = 1000) -> List[Dict]:
+def get_open_auctions(min_price: int = 1*JEWEL_MULTIPLIER, max_price: int = 9999999*JEWEL_MULTIPLIER, limit: int = 1000, pj_filter: bool = False) -> List[Dict]:
     LOG.info(f'Using APIV6 endpoint {ENDPOINT}')
 
-    r = requests.post(ENDPOINT, json={
+    payload = {
         'limit': limit,
 
         'params': [
             {'field': 'saleprice', 'operator': '>=', 'value': min_price},
-            {'field': 'saleprice', 'operator': '<=', 'value': max_price}
+            {'field': 'saleprice', 'operator': '<=', 'value': max_price},
         ],
 
         # bias towards the freshest auctions
@@ -70,7 +70,12 @@ def get_open_auctions(min_price: int = 1*JEWEL_MULTIPLIER, max_price: int = 9999
 
         # n.b., `orderby: saleprice`` tends to result in more stale listings, for some reason
         #'order': {'orderBy': 'saleprice', 'orderDir': 'asc'},
-    })
+    }
+
+    if pj_filter:
+        payload['params'].append({'field': 'pjstatus', 'operator': '=', 'value': 'SURVIVED'})
+
+    r = requests.post(ENDPOINT, json=payload)
 
     if r.status_code != 200:
         raise Exception("HTTP error " + str(r.status_code) + ": " + r.text)

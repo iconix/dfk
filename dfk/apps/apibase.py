@@ -211,11 +211,11 @@ CLASSES_MAP = {
 CLASSES = CLASSES_MAP.keys()
 
 RARITY_TO_COLOR = [
-    'white',    # common
-    'green',    # uncommon
-    'blue',     # rare
-    'orange',   # legendary
-    'purple',   # mythic
+    'white',        # common
+    'green',        # uncommon
+    'blue',         # rare
+    'orange',       # legendary
+    'darkorchid',   # mythic
 ]
 
 STAT_TO_CODE = {
@@ -241,6 +241,8 @@ COMBATPHYSICALDAMAGE_KEY = 'phyDmg'
 COMBATMAGICALDAMAGE_KEY = 'magDmg'
 COMBATPHYSICALTANK_KEY = 'phyTank'
 COMBATMAGICALTANK_KEY = 'magTank'
+
+PJSTATUS_KEY = 'pjstatus'
 
 class EndpointType(Enum):
     APIV5 = auto()
