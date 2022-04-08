@@ -37,6 +37,12 @@ $ poetry run python dfk/apps/hero.py --query-limit 1000 --limit 50 -c Paladin -c
 $ poetry run python dfk/apps/hero.py --max-price 100 --query-limit 1000 --limit 50 -c Warrior -c Knight -c Paladin -c DarkKnight -c Dragoon -p mining --order-by ps
 ```
 
+### Quest App
+
+```bash
+$ poetry run python dfk/apps/quest.py
+```
+
 ### Run Tests
 
 ```bash
